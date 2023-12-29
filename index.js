@@ -38,13 +38,43 @@ async function run() {
     
     app.get('/book/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id, "id");
      const result = await BookCollection.findOne({ _id: new ObjectId(id) });
-      console.log(result, "result");
+      
       res.send(result);
     });
+   app.post('/review/:id', async (req, res) => {
+  const id = req.params.id;
+  const updatedReview = req.body;
+  
+  const result = await BookCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $push: { reviews: updatedReview } }
+  );
+
+  if (result.modifiedCount  !== 1) {
+    return res.status(404).json({ error: 'Review not found' });
+  }
+
+  return res.json({ message: 'Review updated successfully', updatedReview });
+});
+
+    app.get('/review/:id', async (req, res) => {
+  const id = req.params.id;
+
+  const result = await BookCollection.findOne(
+    { _id: new ObjectId(id) },
+   
+  );
+console.log(result, "r");
+  if (result) {
+    res.json(result);
+  } else {
+    res.status(404).json({ error: 'Review not found' });
+  }
+});
+
   } finally {
-    // Ensures that the client will close when you finish/error
+   
     await client.close();
   }
 }
