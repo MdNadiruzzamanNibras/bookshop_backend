@@ -27,7 +27,7 @@ async function run() {
    
    client.connect();
   
-    const BookCollection = client.db('Books').collection('data');
+    const BookCollection = client.db('Books').collection('book');
     
      app.get('/books', async (req, res) => {
       const cursor = BookCollection.find({});
@@ -42,6 +42,34 @@ async function run() {
       
       res.send(result);
     });
+
+    app.put('/edit/:id', async (req, res) => {
+  const { id } = req.params; 
+      const book = req.body; 
+      
+
+      const result = await BookCollection.updateOne({ _id: new ObjectId(id) },
+        { $set: book },
+      { upsert: true });
+    
+      res.json(result);
+     
+    });
+    app.delete('/delete/:id', async (req, res) => {
+    const id = req.params.id
+    const query = {_id: new ObjectId(id)}
+    const result = await BookCollection.deleteOne(query)
+      res.send(result)
+      console.log(result, "delelte");
+
+}) 
+    
+    app.post('/addnew', async (req, res) => {
+  const book = req.body;
+  const result = await BookCollection.insertOne(book);
+  res.send(result);
+    });
+    
    app.post('/review/:id', async (req, res) => {
   const id = req.params.id;
   const updatedReview = req.body;
@@ -65,7 +93,7 @@ async function run() {
     { _id: new ObjectId(id) },
    
   );
-console.log(result, "r");
+
   if (result) {
     res.json(result);
   } else {
